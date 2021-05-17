@@ -3,7 +3,7 @@ from typing import Optional
 
 import rumps
 
-from toony import accounts, toontown
+from toony import accounts, toontown, config
 
 
 __POPULATION_KEY: Optional[str] = None
@@ -46,11 +46,18 @@ def __make_account_menu_item(username: str, password: str, toon: str):
 
 
 def __login(sender):
-    def launch_toontown():
-        toontown.update()
-        print('updated')
-        gameserver, playcookie = toontown.login(sender.username, sender.password)
-        toontown.launch(gameserver, playcookie)
+    def launch_toontown(retries=1):
+        if retries <= 0:
+            return
+
+        try:
+            toontown.update()
+            gameserver, playcookie = toontown.login(sender.username, sender.password)
+            toontown.launch(gameserver, playcookie)
+        except OSError:
+            ttr_path = __ask('Input the path to your TTR Folder', 'TTR Folder Path Not Defined')
+            config.write('Toontown', 'Path', ttr_path)
+            launch_toontown(retries=retries-1)
 
     thread = Thread(target=launch_toontown)
     thread.start()

@@ -15,10 +15,15 @@ __PATCH_URL = 'https://download.toontownrewritten.com/patches/'
 
 
 def update():
-    if not (executable_path := Path(config.get('Toontown', 'Path'))) or not executable_path.is_dir():
-        raise OSError('Toontown Rewritten path not defined or does not exist')
+    if not (executable_path := config.get('Toontown', 'Path')):
+        guess_path = os.path.join(Path.home(), 'Library/Application Support/Toontown Rewritten')
+        if os.path.exists(guess_path):
+            config.write('Toontown', 'Path', guess_path)
+            executable_path = Path(guess_path)
+        else:
+            raise OSError('Toontown Rewritten path not defined or does not exist')
 
-    if update_files := __get_update_files(executable_path):
+    if update_files := __get_update_files(Path(executable_path)):
         ThreadPool(len(update_files)).imap_unordered(__download, update_files)
 
 
