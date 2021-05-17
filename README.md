@@ -20,3 +20,11 @@ login information every time.
 # Disclaimer
 As with the official Toontown Rewritten launcher, you will have to allow the launcher to monitor inputs. 
 You can do this by opening System Preferences > Security & Privacy > Input Monitoring, then add the launcher there.
+
+# Building From Source
+
+```
+git clone https://github.com/thewallacems/Toony.git
+cd Toony
+python3 setup.py py2app -A
+```
