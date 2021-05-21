@@ -7,6 +7,10 @@ OPTIONS = {
     'iconfile': 'icon.icns',
     'plist': {
         'LSUIElement': True,
+        'CFBundleIdentifier': 'thewallacems.Toony',
+        'CFBundleVersion': '2021.05.17',
+        'CFBundleShortVersionString': '2021.05.17',
+        'NSHumanReadableCopyright': 'thewallacems',
     },
     'packages': ['rumps'],
     'resources': ['config.ini', 'accounts.json']

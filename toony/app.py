@@ -1,19 +1,14 @@
 from threading import Thread
-from typing import Optional
 
 import rumps
 
 from toony import accounts, toontown, config
 
 
-__POPULATION_KEY: Optional[str] = None
-
 AppInstance = rumps.App('Toony', title='TTR')
 
 
 def __make_menu():
-    global __POPULATION_KEY
-
     menu = []
 
     for username, info in accounts.load().items():
@@ -23,8 +18,9 @@ def __make_menu():
     menu_item = rumps.MenuItem(title='Add Account', callback=__add_account_item)
     menu.append(menu_item)
 
-    __POPULATION_KEY = f'Population: {toontown.api.get_population()}'
-    menu_item = rumps.MenuItem(title=__POPULATION_KEY)
+    population = toontown.api.get_population()
+    population_title = f'Population: {population}'
+    menu_item = rumps.MenuItem(title=population_title)
     menu.append(menu_item)
 
     return menu
@@ -46,7 +42,9 @@ def __make_account_menu_item(username: str, password: str, toon: str):
 
 
 def __login(sender):
-    def launch_toontown(retries=1):
+    retries_amount = max(config.get('Toontown', 'LoginRetries'), 1)
+
+    def launch_toontown(retries=retries_amount):
         if retries <= 0:
             return
 
@@ -89,18 +87,19 @@ def __delete_account_item(sender):
 
 
 def __ask(message, title, secure=False):
-    return rumps.Window(message=message, title=title, dimensions=(160, 80), cancel='Cancel', secure=secure).run().text
+    dimensions = config.get('App', 'AskWindowDimensions')
+    w, h = dimensions[0], dimensions[1]
+    return rumps.Window(message=message, title=title, dimensions=(w, h), cancel='Cancel', secure=secure).run().text
 
 
-def update_population(_):
-    global __POPULATION_KEY
-
-    new_population_key = f'Population: {toontown.api.get_population()}'
-    AppInstance.menu.get(__POPULATION_KEY).title = new_population_key
-    __POPULATION_KEY = new_population_key
+def __update_population(_):
+    population_menu_item = next(v for k, v in AppInstance.menu.items() if 'Population' in k)
+    population = toontown.api.get_population()
+    population_menu_item.title = f'Population: {population}'
 
 
-update_population_timer = rumps.Timer(callback=update_population, interval=60)
-update_population_timer.start()
+__update_population_interval = config.get('App', 'PopulationUpdateInterval', cls=int)
+__update_population_timer = rumps.Timer(callback=__update_population, interval=__update_population_interval)
+__update_population_timer.start()
 
 AppInstance.menu.update(__make_menu())

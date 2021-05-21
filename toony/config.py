@@ -9,8 +9,8 @@ __config.optionxform = str
 __config.read(__config_file)
 
 
-def get(section: str, option: str):
-    return __config.get(section, option, fallback=None)
+def get(section: str, option: str, cls: type = str):
+    return cls(__config.get(section, option, fallback=None))
 
 
 def write(section: str, option: str, value: str):
