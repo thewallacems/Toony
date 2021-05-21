@@ -4,7 +4,6 @@ import rumps
 
 from toony import accounts, toontown, config
 
-
 AppInstance = rumps.App('Toony', title='TTR')
 
 
@@ -42,7 +41,7 @@ def __make_account_menu_item(username: str, password: str, toon: str):
 
 
 def __login(sender):
-    retries_amount = max(config.get('Toontown', 'LoginRetries'), 1)
+    retries_amount = max(config.get('Toontown', 'LoginRetries', cls=int), 1)
 
     def launch_toontown(retries=retries_amount):
         if retries <= 0:
@@ -88,7 +87,7 @@ def __delete_account_item(sender):
 
 def __ask(message, title, secure=False):
     dimensions = config.get('App', 'AskWindowDimensions')
-    w, h = dimensions[0], dimensions[1]
+    w, h = int(dimensions[0]), int(dimensions[1])
     return rumps.Window(message=message, title=title, dimensions=(w, h), cancel='Cancel', secure=secure).run().text
 
 
